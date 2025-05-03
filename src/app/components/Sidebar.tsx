@@ -2,6 +2,7 @@
 
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { FiImage, FiMessageSquare, FiMic, FiFileText, FiUser, FiLogIn, FiLogOut } from 'react-icons/fi';
+import Image from 'next/image';
 
 type Tab = 'image' | 'chat' | 'transcription' | 'summary';
 
@@ -33,10 +34,12 @@ export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
             {user ? (
               <>
                 {user.photoURL ? (
-                  <img
+                  <Image
                     src={user.photoURL}
                     alt={user.displayName || 'User'}
-                    className="h-10 w-10 rounded-full"
+                    width={40}
+                    height={40}
+                    className="h-10 w-10 rounded-full object-cover"
                   />
                 ) : (
                   <div className="h-10 w-10 rounded-full bg-[#6b7bb6] flex items-center justify-center">
