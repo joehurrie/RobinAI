@@ -4,29 +4,41 @@ import { useAuth } from '@/lib/contexts/AuthContext';
 import { FiImage, FiMessageSquare, FiMic, FiFileText, FiUser, FiLogIn, FiLogOut } from 'react-icons/fi';
 import Image from 'next/image';
 
-type Tab = 'image' | 'chat' | 'transcription' | 'summary';
+type Tab = 'image' | 'chat' | 'real-talk' | 'summary';
 
 interface SidebarProps {
   activeTab: Tab;
   onTabChange: (tab: Tab) => void;
+  isSidebarVisible: boolean;
+  onClose?: () => void;
 }
 
-export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
+export default function Sidebar({ activeTab, onTabChange, isSidebarVisible, onClose }: SidebarProps) {
   const { user, signInWithGoogle, signOut } = useAuth();
 
   const getUserName = (email: string) => {
     return email.split('@')[0];
   };
 
+  const handleTabChange = (tab: Tab) => {
+    onTabChange(tab);
+    // Close sidebar on mobile when a tab is selected
+    if (window.innerWidth < 768 && onClose) {
+      onClose();
+    }
+  };
+
   const tabs = [
     { id: 'image' as Tab, label: 'Image Generation', icon: FiImage },
     { id: 'chat' as Tab, label: 'Chat', icon: FiMessageSquare },
-    { id: 'transcription' as Tab, label: 'Transcription', icon: FiMic },
+    { id: 'real-talk' as Tab, label: 'Real Talk', icon: FiMic },
     { id: 'summary' as Tab, label: 'Document Summary', icon: FiFileText },
   ];
 
   return (
-    <div className="w-64 bg-white shadow-sm h-screen fixed left-0 top-0 pt-16">
+    <div className={`w-full md:w-64 bg-white shadow-sm h-auto md:h-screen fixed md:left-0 top-16 z-20 md:z-10 transition-transform duration-300 ${
+      isSidebarVisible ? 'translate-x-0' : '-translate-x-full'
+    }`}>
       {/* User Profile Section */}
       <div className="p-4 border-b border-gray-200">
         <div className="flex items-center justify-between">
@@ -101,7 +113,7 @@ export default function Sidebar({ activeTab, onTabChange }: SidebarProps) {
             return (
               <li key={tab.id}>
                 <button
-                  onClick={() => onTabChange(tab.id)}
+                  onClick={() => handleTabChange(tab.id)}
                   className={`w-full flex items-center space-x-3 px-4 py-2 rounded-lg transition-colors ${
                     activeTab === tab.id
                       ? 'bg-[#6b7bb6] text-white'

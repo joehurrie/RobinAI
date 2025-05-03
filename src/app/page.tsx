@@ -4,11 +4,11 @@ import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import GeminiImageGenerator from './components/GeminiImageGenerator';
 import ChatInterface from './components/ChatInterface';
-import TranscriptionInterface from './components/TranscriptionInterface';
-import DocumentSummary from './components/DocumentSummary';
+import RealTalk from './components/RealTalk';
+import DocumentSummarizer from './components/DocumentSummarizer';
 import ProtectedRoute from './components/ProtectedRoute';
 
-type Tab = 'image' | 'chat' | 'transcription' | 'summary';
+type Tab = 'image' | 'chat' | 'real-talk' | 'summary';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<Tab>('image');
@@ -28,7 +28,6 @@ export default function Home() {
                 </h1>
                 <p className="text-lg md:text-xl text-[#4a5677] mt-2 mb-4 max-w-md">
                 Transform your ideas into beautiful images instantly.<br />
-          
                 </p>
               </div>
             </section>
@@ -37,10 +36,10 @@ export default function Home() {
         );
       case 'chat':
         return <ChatInterface />;
-      case 'transcription':
-        return <TranscriptionInterface />;
+      case 'real-talk':
+        return <RealTalk />;
       case 'summary':
-        return <DocumentSummary />;
+        return <DocumentSummarizer />;
       default:
         return null;
     }
@@ -48,17 +47,20 @@ export default function Home() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gradient-to-br from-[#f5f8ff] to-[#e6ecf7]">
+      <div className="min-h-screen bg-gray-50">
         <Header 
-          onSidebarToggle={() => setIsSidebarVisible(!isSidebarVisible)}
           isSidebarVisible={isSidebarVisible}
+          onSidebarToggle={() => setIsSidebarVisible(!isSidebarVisible)}
         />
-        <div className="flex pt-16">
-          {isSidebarVisible && <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />}
-          <main className={`flex-1 transition-all duration-300 ${isSidebarVisible ? 'ml-64' : 'ml-0'}`}>
-            <div className="p-6">
-              {renderContent()}
-            </div>
+        <div className="flex">
+          <Sidebar
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            isSidebarVisible={isSidebarVisible}
+            onClose={() => setIsSidebarVisible(false)}
+          />
+          <main className="flex-1 pt-16">
+            {renderContent()}
           </main>
         </div>
       </div>
