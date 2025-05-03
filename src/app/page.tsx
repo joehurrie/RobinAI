@@ -1,48 +1,67 @@
-import Link from "next/link";
+'use client';
+import { useState } from 'react';
+import Header from './components/Header';
+import Sidebar from './components/Sidebar';
+import GeminiImageGenerator from './components/GeminiImageGenerator';
+import ChatInterface from './components/ChatInterface';
+import TranscriptionInterface from './components/TranscriptionInterface';
+import DocumentSummary from './components/DocumentSummary';
+import ProtectedRoute from './components/ProtectedRoute';
+
+type Tab = 'image' | 'chat' | 'transcription' | 'summary';
 
 export default function Home() {
+  const [activeTab, setActiveTab] = useState<Tab>('image');
+  const [isSidebarVisible, setIsSidebarVisible] = useState(true);
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'image':
+        return (
+          <>
+            {/* Hero Section */}
+            <section className="w-full max-w-5xl mx-auto flex flex-col items-center justify-center pt-10 pb-10 px-6">
+              <div className="flex flex-col items-center justify-center gap-6 text-center">
+                <span className="uppercase tracking-widest text-xs text-[#6b7bb6] font-semibold mb-2">AI Image Generation</span>
+                <h1 className="text-4xl md:text-6xl font-extrabold text-[#1a2341] leading-tight drop-shadow-sm">
+                  Create Stunning Images<br />With AI
+                </h1>
+                <p className="text-lg md:text-xl text-[#4a5677] mt-2 mb-4 max-w-md">
+                Transform your ideas into beautiful images instantly.<br />
+          
+                </p>
+              </div>
+            </section>
+            <GeminiImageGenerator />
+          </>
+        );
+      case 'chat':
+        return <ChatInterface />;
+      case 'transcription':
+        return <TranscriptionInterface />;
+      case 'summary':
+        return <DocumentSummary />;
+      default:
+        return null;
+    }
+  };
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-8">
-      <div>
-        <h2 className="text-2xl font-semibold text-center border p-4 font-mono rounded-md">
-          Get started by choosing a template path from the /paths/ folder.
-        </h2>
-      </div>
-      <div>
-        <h1 className="text-6xl font-bold text-center">Make anything you imagine 🪄</h1>
-        <h2 className="text-2xl text-center font-light text-gray-500 pt-4">
-          This whole page will be replaced when you run your template path.
-        </h2>
-      </div>
-      <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="border rounded-lg p-6 hover:bg-gray-100 transition-colors">
-          <h3 className="text-xl font-semibold">AI Chat App</h3>
-          <p className="mt-2 text-sm text-gray-600">
-            An intelligent conversational app powered by AI models, featuring real-time responses
-            and seamless integration with Next.js and various AI providers.
-          </p>
-        </div>
-        <div className="border rounded-lg p-6 hover:bg-gray-100 transition-colors">
-          <h3 className="text-xl font-semibold">AI Image Generation App</h3>
-          <p className="mt-2 text-sm text-gray-600">
-            Create images from text prompts using AI, powered by the Replicate API and Next.js.
-          </p>
-        </div>
-        <div className="border rounded-lg p-6 hover:bg-gray-100 transition-colors">
-          <h3 className="text-xl font-semibold">Social Media App</h3>
-          <p className="mt-2 text-sm text-gray-600">
-            A feature-rich social platform with user profiles, posts, and interactions using
-            Firebase and Next.js.
-          </p>
-        </div>
-        <div className="border rounded-lg p-6 hover:bg-gray-100 transition-colors">
-          <h3 className="text-xl font-semibold">Voice Notes App</h3>
-          <p className="mt-2 text-sm text-gray-600">
-            A voice-based note-taking app with real-time transcription using Deepgram API, 
-            Firebase integration for storage, and a clean, simple interface built with Next.js.
-          </p>
+    <ProtectedRoute>
+      <div className="min-h-screen bg-gradient-to-br from-[#f5f8ff] to-[#e6ecf7]">
+        <Header 
+          onSidebarToggle={() => setIsSidebarVisible(!isSidebarVisible)}
+          isSidebarVisible={isSidebarVisible}
+        />
+        <div className="flex pt-16">
+          {isSidebarVisible && <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />}
+          <main className={`flex-1 transition-all duration-300 ${isSidebarVisible ? 'ml-64' : 'ml-0'}`}>
+            <div className="p-6">
+              {renderContent()}
+            </div>
+          </main>
         </div>
       </div>
-    </main>
+    </ProtectedRoute>
   );
 }
