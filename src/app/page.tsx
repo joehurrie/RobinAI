@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useLayoutEffect, useState } from 'react';
 import { Pen } from 'lucide-react';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
@@ -37,6 +37,11 @@ export default function Home() {
   const [isSidebarVisible, setIsSidebarVisible] = useState(false);
   const [language, setLanguage] = useState<"sw" | "en">("sw");
   const [prompt, setPrompt] = useState('');
+
+  // Scroll to top on mount (prevents scroll flashes)
+  useLayoutEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, []);
 
   const examplePrompts = [
     {
@@ -269,17 +274,17 @@ export default function Home() {
         <div className="flex">
           <Sidebar
             activeTab={activeTab}
-            onTabChange={(tab) => setActiveTab(tab)}
+            onTabChange={(tab) => {
+              setActiveTab(tab);
+              // Auto-close sidebar on mobile
+              if (window.innerWidth < 768) setIsSidebarVisible(false);
+            }}
             isSidebarVisible={isSidebarVisible}
             onClose={() => setIsSidebarVisible(false)}
             language={language}
             onToggleLanguage={handleToggleLanguage}
           />
-          <main
-            className={`flex-1 pt-16 transition-all duration-300 ${
-              isSidebarVisible ? 'md:ml-64' : ''
-            }`}
-          >
+          <main className={`flex-1 pt-16 transition-all duration-300 ${isSidebarVisible ? 'md:ml-64' : ''}`}>
             {renderContent()}
           </main>
         </div>

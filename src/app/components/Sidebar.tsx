@@ -133,7 +133,7 @@ export default function Sidebar({ activeTab, onTabChange, isSidebarVisible, onCl
           onClick={onToggleLanguage}
           className="mt-4 w-full md:hidden border border-blue-500 text-blue-600 px-4 py-2 rounded bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors"
         >
-          {language === 'en' ? 'Swahili' : 'English'}
+          {language === 'en' ? 'English' : 'Swahili'}
         </button>
       </nav>
     </div>
