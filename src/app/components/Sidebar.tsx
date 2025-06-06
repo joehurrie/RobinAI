@@ -3,17 +3,18 @@
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { FiImage, FiMessageSquare, FiMic, FiFileText, FiUser, FiLogIn, FiLogOut } from 'react-icons/fi';
 import Image from 'next/image';
-
-type Tab = 'image' | 'chat' | 'real-talk' | 'summary';
+import type { Tab } from '../types';
 
 interface SidebarProps {
   activeTab: Tab;
   onTabChange: (tab: Tab) => void;
   isSidebarVisible: boolean;
   onClose?: () => void;
+  language: string;
+  onToggleLanguage: () => void;
 }
 
-export default function Sidebar({ activeTab, onTabChange, isSidebarVisible, onClose }: SidebarProps) {
+export default function Sidebar({ activeTab, onTabChange, isSidebarVisible, onClose, language, onToggleLanguage }: SidebarProps) {
   const { user, signInWithGoogle, signOut } = useAuth();
 
   const getUserName = (email: string) => {
@@ -127,7 +128,14 @@ export default function Sidebar({ activeTab, onTabChange, isSidebarVisible, onCl
             );
           })}
         </ul>
+        {/* Language Switch Button: mobile only */}
+        <button
+          onClick={onToggleLanguage}
+          className="mt-4 w-full md:hidden border border-blue-500 text-blue-600 px-4 py-2 rounded bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors"
+        >
+          {language === 'en' ? 'Swahili' : 'English'}
+        </button>
       </nav>
     </div>
   );
-} 
+}

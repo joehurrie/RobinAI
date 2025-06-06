@@ -97,7 +97,6 @@ export default function ChatInterface() {
     setIsLoading(true);
 
     try {
-      console.log('Sending request to /api/gemini/chat');
       const response = await fetch('/api/gemini/chat', {
         method: 'POST',
         headers: {
@@ -108,38 +107,28 @@ export default function ChatInterface() {
         }),
       });
 
-      console.log('Response status:', response.status);
-      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-
       const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        const text = await response.text();
-        console.error('Non-JSON response details:', {
-          status: response.status,
-          statusText: response.statusText,
-          contentType,
-          text
-        });
-        throw new Error(`Server returned non-JSON response (${response.status} ${response.statusText})`);
+      let aiResponse = '';
+      let chartData;
+
+      if (contentType && contentType.includes('application/json')) {
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error || `Server error: ${response.status}`);
+        }
+        aiResponse = data.response || '';
+      } else {
+        aiResponse = await response.text();
       }
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        console.error('Error response:', data);
-        throw new Error(data.error || `Server error: ${response.status}`);
-      }
-
-      if (!data.response) {
-        console.error('Missing response in data:', data);
+      if (!aiResponse) {
         throw new Error('No response received from the AI');
       }
 
-      // Check if the response contains chart data
-      let chartData;
-      if (data.response.includes('CHART_DATA:')) {
+      // Check for chart data
+      if (aiResponse.includes('CHART_DATA:')) {
         try {
-          const chartDataStr = data.response.split('CHART_DATA:')[1].trim();
+          const chartDataStr = aiResponse.split('CHART_DATA:')[1].trim();
           const parsedData = JSON.parse(chartDataStr);
           chartData = {
             labels: parsedData.labels,
@@ -156,14 +145,13 @@ export default function ChatInterface() {
 
       const newMessage: Message = {
         role: 'assistant',
-        content: data.response.split('CHART_DATA:')[0].trim(),
+        content: aiResponse.split('CHART_DATA:')[0].trim(),
         ...(chartData && { chartData }),
       };
 
       setMessages(prev => [...prev, newMessage]);
       speakText(newMessage.content);
     } catch (error) {
-      console.error('Error in handleSubmit:', error);
       setMessages(prev => [...prev, { 
         role: 'assistant', 
         content: error instanceof Error 
@@ -176,34 +164,34 @@ export default function ChatInterface() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-4 sm:p-6 md:p-8">
+    <div className="max-w-4xl mx-auto p-2 sm:p-4 md:p-8">
       <div className="bg-white rounded-lg shadow-lg overflow-hidden flex flex-col h-[calc(100vh-12rem)]">
         {/* Chat Header */}
-        <div className="p-4 border-b border-gray-200">
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-800">AI Chat</h2>
+        <div className="p-2 sm:p-4 border-b border-gray-200">
+          <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800">AI Chat</h2>
         </div>
 
         {/* Messages Container */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div className="flex-1 overflow-y-auto p-2 sm:p-4 space-y-4">
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-gray-500">
-              <p className="text-center">Start a conversation with the AI assistant</p>
+              <p className="text-center text-xs sm:text-base">Start a conversation with the AI assistant</p>
             </div>
           ) : (
             messages.map((message, index) => (
               <div key={index} className="space-y-4">
                 <div
-                  className={`flex items-start space-x-3 ${
+                  className={`flex items-start space-x-2 sm:space-x-3 ${
                     message.role === 'user' ? 'justify-end' : 'justify-start'
                   }`}
                 >
                   {message.role === 'assistant' && (
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#6b7bb6] flex items-center justify-center">
+                    <div className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#6b7bb6] flex items-center justify-center">
                       <RiRobot2Line className="w-4 h-4 text-white" />
                     </div>
                   )}
                   <div
-                    className={`max-w-[80%] rounded-lg p-3 ${
+                    className={`max-w-[80%] rounded-lg p-2 sm:p-3 text-xs sm:text-base ${
                       message.role === 'user'
                         ? 'bg-[#6b7bb6] text-white'
                         : 'bg-gray-100 text-gray-800'
@@ -212,7 +200,7 @@ export default function ChatInterface() {
                     <p className="whitespace-pre-wrap">{message.content}</p>
                   </div>
                   {message.role === 'user' && (
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                    <div className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gray-200 flex items-center justify-center">
                       <FiUser className="w-4 h-4 text-gray-600" />
                     </div>
                   )}
@@ -226,12 +214,12 @@ export default function ChatInterface() {
             ))
           )}
           {isLoading && (
-            <div className="flex items-start space-x-3">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-[#6b7bb6] flex items-center justify-center">
+            <div className="flex items-start space-x-2 sm:space-x-3">
+              <div className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#6b7bb6] flex items-center justify-center">
                 <RiRobot2Line className="w-4 h-4 text-white" />
               </div>
-              <div className="bg-gray-100 rounded-lg p-3">
-                <div className="flex space-x-2">
+              <div className="bg-gray-100 rounded-lg p-2 sm:p-3">
+                <div className="flex space-x-1 sm:space-x-2">
                   <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
                   <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-100" />
                   <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-200" />
@@ -243,14 +231,14 @@ export default function ChatInterface() {
         </div>
 
         {/* Input Form */}
-        <form onSubmit={handleSubmit} className="p-4 border-t border-gray-200">
-          <div className="flex space-x-4">
+        <form onSubmit={handleSubmit} className="p-2 sm:p-4 border-t border-gray-200">
+          <div className="flex space-x-2 sm:space-x-4">
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Type your message..."
-              className="flex-1 p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6b7bb6] focus:border-transparent"
+              className="flex-1 p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6b7bb6] focus:border-transparent text-xs sm:text-base"
               disabled={isLoading}
             />
             <button
@@ -277,4 +265,4 @@ export default function ChatInterface() {
       </div>
     </div>
   );
-} 
+}

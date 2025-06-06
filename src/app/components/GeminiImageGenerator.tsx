@@ -3,12 +3,38 @@ import { useState } from 'react';
 import { Download, Eye } from 'lucide-react';
 import Image from 'next/image';
 
-export default function GeminiImageGenerator() {
-  const [prompt, setPrompt] = useState('');
+const translations = {
+  en: {
+    placeholder: "Enter your image description...",
+    generate: "Generate Images",
+    generating: "Generating...",
+    error: "Error generating images",
+    close: "Close",
+  },
+  sw: {
+    placeholder: "Weka maelezo ya picha yako...",
+    generate: "Tengeneza Picha",
+    generating: "Inatengeneza...",
+    error: "Hitilafu kutengeneza picha",
+    close: "Funga",
+  },
+};
+
+export default function GeminiImageGenerator({
+  language = "en",
+  prompt,
+  setPrompt,
+}: {
+  language?: "en" | "sw";
+  prompt: string;
+  setPrompt: (val: string) => void;
+}) {
   const [images, setImages] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+  const t = translations[language];
 
   const generateImages = async () => {
     setLoading(true);
@@ -52,7 +78,7 @@ export default function GeminiImageGenerator() {
           rows={4}
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
-          placeholder="Enter your image description..."
+          placeholder={t.placeholder}
           className="w-full p-4 border rounded-lg mb-4 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black placeholder-gray-500"
         />
         <button
@@ -60,13 +86,13 @@ export default function GeminiImageGenerator() {
           disabled={loading || !prompt.trim()}
           className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg disabled:opacity-50 hover:bg-blue-700 transition-colors"
         >
-          {loading ? 'Generating...' : 'Generate Images'}
+          {loading ? t.generating : t.generate}
         </button>
       </div>
       
       {error && (
         <div className="mt-4 p-4 bg-red-100 text-red-700 rounded-lg w-full">
-          {error}
+          {t.error}
         </div>
       )}
       
@@ -113,7 +139,7 @@ export default function GeminiImageGenerator() {
               onClick={() => setSelectedImage(null)}
               className="absolute -top-10 right-0 text-white hover:text-blue-400 transition-colors"
             >
-              Close
+              {t.close}
             </button>
             <Image
               src={selectedImage}
@@ -127,4 +153,4 @@ export default function GeminiImageGenerator() {
       )}
     </div>
   );
-} 
+}
